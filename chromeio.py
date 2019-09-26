@@ -455,9 +455,15 @@ with open(procmon_log_name, 'r') as csvfile:
             write_bytes = 0
             read_bytes = 0
             op = row[op_col_idx]
-            if op == 'IRP_MJ_SET_INFORMATION':
+            if (op == 'IRP_MJ_SET_INFORMATION' or
+                    op == 'SetRenameInformationFile'):
                 detail = ParseDetail(row[detail_col_idx])
-                if 'Type' in detail and detail['Type'] == 'SetRenameInformationFile':
+                # If the Detail column has a 'Type' field that is set to
+                # SetRenameInformationFile (the format used when op is equal to
+                # IRP_MJ_SET_INFORMATION) or if op is equal to
+                # SetRenameInformationFile (the new procmon format) then process
+                # the rename operation.
+                if detail.get('Type', op) == 'SetRenameInformationFile':
                     old_name = path
                     if True:
                         file_totals = ExtractFileTotalsFromCategory(old_name)
